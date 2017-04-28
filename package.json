@@ -18,7 +18,8 @@
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
     "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw.js",
     "prepublish": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "babel": "babel . -d . --ignore test,node_modules"
   },
   "repository": {
     "type": "git",
@@ -39,10 +40,11 @@
   },
   "devDependencies": {
     "@turf/centroid": "^4.0.0",
+    "babel-cli": "^6.24.1",
     "babel-core": "^6.9.1",
     "babel-eslint": "^7.1.0",
     "babel-plugin-__coverage__": "^11.0.0",
-    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2015-ie": "^6.7.0",
     "babel-register": "^6.5.2",
     "babelify": "^7.2.0",

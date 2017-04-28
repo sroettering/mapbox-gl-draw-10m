@@ -1,22 +1,27 @@
-const CommonSelectors = require('../lib/common_selectors');
-const LineString = require('../feature_types/line_string');
-const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const Constants = require('../constants');
-const createVertex = require('../lib/create_vertex');
+'use strict';
 
-module.exports = function(ctx, opts) {
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var CommonSelectors = require('../lib/common_selectors');
+var LineString = require('../feature_types/line_string');
+var isEventAtCoordinates = require('../lib/is_event_at_coordinates');
+var doubleClickZoom = require('../lib/double_click_zoom');
+var Constants = require('../constants');
+var createVertex = require('../lib/create_vertex');
+
+module.exports = function (ctx, opts) {
   opts = opts || {};
-  const featureId = opts.featureId;
+  var featureId = opts.featureId;
 
-  let line, currentVertexPosition;
-  let direction = 'forward';
+  var line = void 0,
+      currentVertexPosition = void 0;
+  var direction = 'forward';
   if (featureId) {
     line = ctx.store.get(featureId);
     if (!line) {
       throw new Error('Could not find a feature with the provided featureId');
     }
-    let from = opts.from;
+    var from = opts.from;
     if (from && from.type === 'Feature' && from.geometry && from.geometry.type === 'Point') {
       from = from.geometry;
     }
@@ -26,16 +31,20 @@ module.exports = function(ctx, opts) {
     if (!from || !Array.isArray(from)) {
       throw new Error('Please use the `from` property to indicate which point to continue the line from');
     }
-    const lastCoord = line.coordinates.length - 1;
+    var lastCoord = line.coordinates.length - 1;
     if (line.coordinates[lastCoord][0] === from[0] && line.coordinates[lastCoord][1] === from[1]) {
+      var _line;
+
       currentVertexPosition = lastCoord + 1;
       // add one new coordinate to continue from
-      line.addCoordinate(currentVertexPosition, ...line.coordinates[lastCoord]);
+      (_line = line).addCoordinate.apply(_line, [currentVertexPosition].concat(_toConsumableArray(line.coordinates[lastCoord])));
     } else if (line.coordinates[0][0] === from[0] && line.coordinates[0][1] === from[1]) {
+      var _line2;
+
       direction = 'backwards';
       currentVertexPosition = 0;
       // add one new coordinate to continue from
-      line.addCoordinate(currentVertexPosition, ...line.coordinates[0]);
+      (_line2 = line).addCoordinate.apply(_line2, [currentVertexPosition].concat(_toConsumableArray(line.coordinates[0])));
     } else {
       throw new Error('`from` should match the point at either the start or the end of the provided LineString');
     }
@@ -55,13 +64,13 @@ module.exports = function(ctx, opts) {
   if (ctx._test) ctx._test.line = line;
 
   return {
-    start: function() {
+    start: function start() {
       ctx.store.clearSelected();
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
 
-      this.on('mousemove', CommonSelectors.true, (e) => {
+      this.on('mousemove', CommonSelectors.true, function (e) {
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
@@ -74,8 +83,7 @@ module.exports = function(ctx, opts) {
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
       function clickAnywhere(e) {
-        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]) ||
-            direction === 'backwards' && isEventAtCoordinates(e, line.coordinates[currentVertexPosition + 1])) {
+        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]) || direction === 'backwards' && isEventAtCoordinates(e, line.coordinates[currentVertexPosition + 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
@@ -91,11 +99,11 @@ module.exports = function(ctx, opts) {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       }
 
-      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+      this.on('keyup', CommonSelectors.isEscapeKey, function () {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
-      this.on('keyup', CommonSelectors.isEnterKey, () => {
+      this.on('keyup', CommonSelectors.isEnterKey, function () {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       });
       ctx.events.actionable({
@@ -105,7 +113,7 @@ module.exports = function(ctx, opts) {
       });
     },
 
-    stop() {
+    stop: function stop() {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
@@ -113,7 +121,7 @@ module.exports = function(ctx, opts) {
       if (ctx.store.get(line.id) === undefined) return;
 
       //remove last added coordinate
-      line.removeCoordinate(`${currentVertexPosition}`);
+      line.removeCoordinate('' + currentVertexPosition);
       if (line.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [line.toGeoJSON()]
@@ -123,10 +131,9 @@ module.exports = function(ctx, opts) {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
-
-    render(geojson, callback) {
-      const isActiveLine = geojson.properties.id === line.id;
-      geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+    render: function render(geojson, callback) {
+      var isActiveLine = geojson.properties.id === line.id;
+      geojson.properties.active = isActiveLine ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActiveLine) return callback(geojson);
 
       // Only render the line if it has at least one real coordinate
@@ -134,18 +141,12 @@ module.exports = function(ctx, opts) {
       geojson.properties.meta = Constants.meta.FEATURE;
 
       if (geojson.geometry.coordinates.length >= 3) {
-        callback(createVertex(
-          line.id,
-          geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
-          `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1}`,
-          false
-        ));
+        callback(createVertex(line.id, geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1], '' + (direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1), false));
       }
 
       callback(geojson);
     },
-
-    trash() {
+    trash: function trash() {
       ctx.store.delete([line.id], { silent: true });
       ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }

@@ -6,45 +6,42 @@ var formatNumber = require('../lib/format_number');
 var fpsRunner = require('../lib/fps');
 var DrawMouse = require('../lib/mouse_draw');
 
-var START = {x: 189, y: 293}
+var START = { x: 189, y: 293 };
 
-module.exports = function(options) {
-    var evented = util.extend({}, Evented);
+module.exports = function (options) {
+  var evented = util.extend({}, Evented);
 
-    var out = options.createMap();
+  var out = options.createMap();
 
-    var dragMouse = DrawMouse(START, out.map);
+  var dragMouse = DrawMouse(START, out.map);
 
-    var progressDiv = document.getElementById('progress');
-    out.map.on('progress', function(e) {
-      progressDiv.style.width = e.done+"%";
+  var progressDiv = document.getElementById('progress');
+  out.map.on('progress', function (e) {
+    progressDiv.style.width = e.done + "%";
+  });
+
+  out.map.on('load', function () {
+    out.map.on('draw.modechange', function (e) {
+      if (e.mode === 'simple_select') {
+        out.draw.changeMode('draw_point');
+      }
     });
+    out.draw.changeMode('draw_point');
 
-    out.map.on('load', function() {
-      out.map.on('draw.modechange', function(e) {
-        if(e.mode === 'simple_select') {
-          out.draw.changeMode('draw_point');
+    setTimeout(function () {
+      var FPSControl = fpsRunner();
+      FPSControl.start();
+      dragMouse(function () {
+        var fps = FPSControl.stop();
+        if (fps < 55) {
+          evented.fire('fail', { message: formatNumber(fps) + ' fps - expected 55fps or better' });
+        } else {
+          evented.fire('pass', { message: formatNumber(fps) + ' fps' });
         }
+        out.draw.changeMode('simple_select');
       });
-      out.draw.changeMode('draw_point');
+    }, 2000);
+  });
 
-      setTimeout(function() {
-        var FPSControl = fpsRunner();
-        FPSControl.start();
-        dragMouse(function() {
-          var fps = FPSControl.stop();
-          if (fps < 55) {
-            evented.fire('fail', {message: formatNumber(fps)+' fps - expected 55fps or better'});
-          }
-          else {
-            evented.fire('pass', {message: formatNumber(fps)+' fps'});
-          }
-          out.draw.changeMode('simple_select');
-        });
-      }, 2000);
-    });
-
-    return evented;
+  return evented;
 };
-
-

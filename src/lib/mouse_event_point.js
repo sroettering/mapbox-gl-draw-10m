@@ -1,4 +1,6 @@
-const Point = require('point-geometry');
+'use strict';
+
+var Point = require('point-geometry');
 
 /**
  * Returns a Point representing a mouse event's position
@@ -9,11 +11,8 @@ const Point = require('point-geometry');
  * @returns {Point}
  */
 function mouseEventPoint(mouseEvent, container) {
-  const rect = container.getBoundingClientRect();
-  return new Point(
-    mouseEvent.clientX - rect.left - (container.clientLeft || 0),
-    mouseEvent.clientY - rect.top - (container.clientTop || 0)
-  );
+  var rect = container.getBoundingClientRect();
+  return new Point(mouseEvent.clientX - rect.left - (container.clientLeft || 0), mouseEvent.clientY - rect.top - (container.clientTop || 0));
 }
 
 module.exports = mouseEventPoint;

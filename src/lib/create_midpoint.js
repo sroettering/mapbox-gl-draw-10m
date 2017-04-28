@@ -1,21 +1,20 @@
-const Constants = require('../constants');
+'use strict';
 
-module.exports = function(parent, startVertex, endVertex, map) {
-  const startCoord = startVertex.geometry.coordinates;
-  const endCoord = endVertex.geometry.coordinates;
+var Constants = require('../constants');
+
+module.exports = function (parent, startVertex, endVertex, map) {
+  var startCoord = startVertex.geometry.coordinates;
+  var endCoord = endVertex.geometry.coordinates;
 
   // If a coordinate exceeds the projection, we can't calculate a midpoint,
   // so run away
-  if (startCoord[1] > Constants.LAT_RENDERED_MAX ||
-    startCoord[1] < Constants.LAT_RENDERED_MIN ||
-    endCoord[1] > Constants.LAT_RENDERED_MAX ||
-    endCoord[1] < Constants.LAT_RENDERED_MIN) {
+  if (startCoord[1] > Constants.LAT_RENDERED_MAX || startCoord[1] < Constants.LAT_RENDERED_MIN || endCoord[1] > Constants.LAT_RENDERED_MAX || endCoord[1] < Constants.LAT_RENDERED_MIN) {
     return null;
   }
 
-  const ptA = map.project([ startCoord[0], startCoord[1] ]);
-  const ptB = map.project([ endCoord[0], endCoord[1] ]);
-  const mid = map.unproject([ (ptA.x + ptB.x) / 2, (ptA.y + ptB.y) / 2 ]);
+  var ptA = map.project([startCoord[0], startCoord[1]]);
+  var ptB = map.project([endCoord[0], endCoord[1]]);
+  var mid = map.unproject([(ptA.x + ptB.x) / 2, (ptA.y + ptB.y) / 2]);
 
   return {
     type: Constants.geojsonTypes.FEATURE,

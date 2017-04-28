@@ -1,13 +1,11 @@
-const sortFeatures = require('./sort_features');
-const mapEventToBoundingBox = require('./map_event_to_bounding_box');
-const Constants = require('../constants');
-const StringSet = require('./string_set');
+'use strict';
 
-const META_TYPES = [
-  Constants.meta.FEATURE,
-  Constants.meta.MIDPOINT,
-  Constants.meta.VERTEX
-];
+var sortFeatures = require('./sort_features');
+var mapEventToBoundingBox = require('./map_event_to_bounding_box');
+var Constants = require('../constants');
+var StringSet = require('./string_set');
+
+var META_TYPES = [Constants.meta.FEATURE, Constants.meta.MIDPOINT, Constants.meta.VERTEX];
 
 // Requires either event or bbox
 module.exports = {
@@ -26,20 +24,21 @@ function featuresAtTouch(event, bbox, ctx) {
 function featuresAt(event, bbox, ctx, buffer) {
   if (ctx.map === null) return [];
 
-  const box = (event) ? mapEventToBoundingBox(event, buffer) : bbox;
+  var box = event ? mapEventToBoundingBox(event, buffer) : bbox;
 
-  const queryParams = {};
-  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
+  var queryParams = {};
+  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(function (s) {
+    return s.id;
+  });
 
-  const features = ctx.map.queryRenderedFeatures(box, queryParams)
-    .filter((feature) => {
-      return META_TYPES.indexOf(feature.properties.meta) !== -1;
-    });
+  var features = ctx.map.queryRenderedFeatures(box, queryParams).filter(function (feature) {
+    return META_TYPES.indexOf(feature.properties.meta) !== -1;
+  });
 
-  const featureIds = new StringSet();
-  const uniqueFeatures = [];
-  features.forEach((feature) => {
-    const featureId = feature.properties.id;
+  var featureIds = new StringSet();
+  var uniqueFeatures = [];
+  features.forEach(function (feature) {
+    var featureId = feature.properties.id;
     if (featureIds.has(featureId)) return;
     featureIds.add(featureId);
     uniqueFeatures.push(feature);

@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
   classes: {
     CONTROL_BASE: 'mapboxgl-ctrl',

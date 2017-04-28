@@ -1,7 +1,10 @@
-function throttle(fn, time, context) {
-  let lock, args;
+"use strict";
 
-  function later () {
+function throttle(fn, time, context) {
+  var lock = void 0,
+      args = void 0;
+
+  function later() {
     // reset lock and call if queued
     lock = false;
     if (args) {
@@ -10,11 +13,10 @@ function throttle(fn, time, context) {
     }
   }
 
-  function wrapperFn () {
+  function wrapperFn() {
     if (lock) {
       // called too soon, queue to call later
       args = arguments;
-
     } else {
       // lock until later then call
       lock = true;

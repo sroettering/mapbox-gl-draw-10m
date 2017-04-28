@@ -1,13 +1,15 @@
-const CommonSelectors = require('../lib/common_selectors');
-const Polygon = require('../feature_types/polygon');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const Constants = require('../constants');
-const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
-const createVertex = require('../lib/create_vertex');
+'use strict';
 
-module.exports = function(ctx) {
+var CommonSelectors = require('../lib/common_selectors');
+var Polygon = require('../feature_types/polygon');
+var doubleClickZoom = require('../lib/double_click_zoom');
+var Constants = require('../constants');
+var isEventAtCoordinates = require('../lib/is_event_at_coordinates');
+var createVertex = require('../lib/create_vertex');
 
-  const polygon = new Polygon(ctx, {
+module.exports = function (ctx) {
+
+  var polygon = new Polygon(ctx, {
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
@@ -15,20 +17,20 @@ module.exports = function(ctx) {
       coordinates: [[]]
     }
   });
-  let currentVertexPosition = 0;
+  var currentVertexPosition = 0;
 
   if (ctx._test) ctx._test.polygon = polygon;
 
   ctx.store.add(polygon);
 
   return {
-    start() {
+    start: function start() {
       ctx.store.clearSelected();
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
-      this.on('mousemove', CommonSelectors.true, e => {
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+      this.on('mousemove', CommonSelectors.true, function (e) {
+        polygon.updateCoordinate('0.' + currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
@@ -43,17 +45,17 @@ module.exports = function(ctx) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+        polygon.updateCoordinate('0.' + currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
       }
       function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
       }
-      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+      this.on('keyup', CommonSelectors.isEscapeKey, function () {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
-      this.on('keyup', CommonSelectors.isEnterKey, () => {
+      this.on('keyup', CommonSelectors.isEnterKey, function () {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
       });
       ctx.events.actionable({
@@ -63,7 +65,8 @@ module.exports = function(ctx) {
       });
     },
 
-    stop: function() {
+
+    stop: function stop() {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
@@ -72,7 +75,7 @@ module.exports = function(ctx) {
       if (ctx.store.get(polygon.id) === undefined) return;
 
       //remove last added coordinate
-      polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      polygon.removeCoordinate('0.' + currentVertexPosition);
       if (polygon.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]
@@ -83,16 +86,16 @@ module.exports = function(ctx) {
       }
     },
 
-    render(geojson, callback) {
-      const isActivePolygon = geojson.properties.id === polygon.id;
-      geojson.properties.active = (isActivePolygon) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+    render: function render(geojson, callback) {
+      var isActivePolygon = geojson.properties.id === polygon.id;
+      geojson.properties.active = isActivePolygon ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActivePolygon) return callback(geojson);
 
       // Don't render a polygon until it has two positions
       // (and a 3rd which is just the first repeated)
       if (geojson.geometry.coordinates.length === 0) return;
 
-      const coordinateCount = geojson.geometry.coordinates[0].length;
+      var coordinateCount = geojson.geometry.coordinates[0].length;
 
       // If we have fewer than two positions (plus the closer),
       // it's not yet a shape to render
@@ -104,8 +107,8 @@ module.exports = function(ctx) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
-        const endPos = geojson.geometry.coordinates[0].length - 3;
-        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
+        var endPos = geojson.geometry.coordinates[0].length - 3;
+        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][endPos], '0.' + endPos, false));
       }
 
       // If we have more than two positions (plus the closer),
@@ -116,9 +119,7 @@ module.exports = function(ctx) {
 
       // If we've only drawn two positions (plus the closer),
       // make a LineString instead of a Polygon
-      const lineCoordinates = [
-        [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
-      ];
+      var lineCoordinates = [[geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]];
       return callback({
         type: Constants.geojsonTypes.FEATURE,
         properties: geojson.properties,
@@ -128,7 +129,7 @@ module.exports = function(ctx) {
         }
       });
     },
-    trash() {
+    trash: function trash() {
       ctx.store.delete([polygon.id], { silent: true });
       ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }

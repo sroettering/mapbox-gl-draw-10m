@@ -1,7 +1,9 @@
-const xtend = require('xtend');
-const Constants = require('./constants');
+'use strict';
 
-const defaultOptions = {
+var xtend = require('xtend');
+var Constants = require('./constants');
+
+var defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
   touchEnabled: true,
@@ -14,7 +16,7 @@ const defaultOptions = {
   userProperties: false
 };
 
-const showControls = {
+var showControls = {
   point: true,
   line_string: true,
   polygon: true,
@@ -23,7 +25,7 @@ const showControls = {
   uncombine_features: true
 };
 
-const hideControls = {
+var hideControls = {
   point: false,
   line_string: false,
   polygon: false,
@@ -33,17 +35,19 @@ const hideControls = {
 };
 
 function addSources(styles, sourceBucket) {
-  return styles.map(style => {
+  return styles.map(function (style) {
     if (style.source) return style;
     return xtend(style, {
-      id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
+      id: style.id + '.' + sourceBucket,
+      source: sourceBucket === 'hot' ? Constants.sources.HOT : Constants.sources.COLD
     });
   });
 }
 
-module.exports = function(options = {}) {
-  let withDefaults = xtend(options);
+module.exports = function () {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  var withDefaults = xtend(options);
 
   if (!options.controls) {
     withDefaults.controls = {};

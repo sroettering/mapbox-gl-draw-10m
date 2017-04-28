@@ -1,28 +1,27 @@
-const setupModeHandler = require('./lib/mode_handler');
-const getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
-const featuresAt = require('./lib/features_at');
-const isClick = require('./lib/is_click');
-const isTap = require('./lib/is_tap');
-const Constants = require('./constants');
+'use strict';
 
-const modes = {
-  [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
-  [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
-  [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
-  [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
-  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
-  [Constants.modes.STATIC]: require('./modes/static')
-};
+var _modes;
 
-module.exports = function(ctx) {
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-  let mouseDownInfo = {};
-  let touchStartInfo = {};
-  const events = {};
-  let currentModeName = Constants.modes.SIMPLE_SELECT;
-  let currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+var setupModeHandler = require('./lib/mode_handler');
+var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
+var featuresAt = require('./lib/features_at');
+var isClick = require('./lib/is_click');
+var isTap = require('./lib/is_tap');
+var Constants = require('./constants');
 
-  events.drag = function(event, isDrag) {
+var modes = (_modes = {}, _defineProperty(_modes, Constants.modes.SIMPLE_SELECT, require('./modes/simple_select')), _defineProperty(_modes, Constants.modes.DIRECT_SELECT, require('./modes/direct_select')), _defineProperty(_modes, Constants.modes.DRAW_POINT, require('./modes/draw_point')), _defineProperty(_modes, Constants.modes.DRAW_LINE_STRING, require('./modes/draw_line_string')), _defineProperty(_modes, Constants.modes.DRAW_POLYGON, require('./modes/draw_polygon')), _defineProperty(_modes, Constants.modes.STATIC, require('./modes/static')), _modes);
+
+module.exports = function (ctx) {
+
+  var mouseDownInfo = {};
+  var touchStartInfo = {};
+  var events = {};
+  var _currentModeName = Constants.modes.SIMPLE_SELECT;
+  var currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+
+  events.drag = function (event, isDrag) {
     if (isDrag({
       point: event.point,
       time: new Date().getTime()
@@ -34,36 +33,40 @@ module.exports = function(ctx) {
     }
   };
 
-  events.mousedrag = function(event) {
-    events.drag(event, (endInfo) => !isClick(mouseDownInfo, endInfo));
+  events.mousedrag = function (event) {
+    events.drag(event, function (endInfo) {
+      return !isClick(mouseDownInfo, endInfo);
+    });
   };
 
-  events.touchdrag = function(event) {
-    events.drag(event, (endInfo) => !isTap(touchStartInfo, endInfo));
+  events.touchdrag = function (event) {
+    events.drag(event, function (endInfo) {
+      return !isTap(touchStartInfo, endInfo);
+    });
   };
 
-  events.mousemove = function(event) {
-    const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
+  events.mousemove = function (event) {
+    var button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
     if (button === 1) {
       return events.mousedrag(event);
     }
-    const target = getFeaturesAndSetCursor(event, ctx);
+    var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
     currentMode.mousemove(event);
   };
 
-  events.mousedown = function(event) {
+  events.mousedown = function (event) {
     mouseDownInfo = {
       time: new Date().getTime(),
       point: event.point
     };
-    const target = getFeaturesAndSetCursor(event, ctx);
+    var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
-  events.mouseup = function(event) {
-    const target = getFeaturesAndSetCursor(event, ctx);
+  events.mouseup = function (event) {
+    var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
 
     if (isClick(mouseDownInfo, {
@@ -76,11 +79,11 @@ module.exports = function(ctx) {
     }
   };
 
-  events.mouseout = function(event) {
+  events.mouseout = function (event) {
     currentMode.mouseout(event);
   };
 
-  events.touchstart = function(event) {
+  events.touchstart = function (event) {
     // Prevent emulated mouse events because we will fully handle the touch here.
     // This does not stop the touch events from propogating to mapbox though.
     event.originalEvent.preventDefault();
@@ -92,12 +95,12 @@ module.exports = function(ctx) {
       time: new Date().getTime(),
       point: event.point
     };
-    const target = featuresAt.touch(event, null, ctx)[0];
+    var target = featuresAt.touch(event, null, ctx)[0];
     event.featureTarget = target;
     currentMode.touchstart(event);
   };
 
-  events.touchmove = function(event) {
+  events.touchmove = function (event) {
     event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
@@ -107,13 +110,13 @@ module.exports = function(ctx) {
     return events.touchdrag(event);
   };
 
-  events.touchend = function(event) {
+  events.touchend = function (event) {
     event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
 
-    const target = featuresAt.touch(event, null, ctx)[0];
+    var target = featuresAt.touch(event, null, ctx)[0];
     event.featureTarget = target;
     if (isTap(touchStartInfo, {
       time: new Date().getTime(),
@@ -127,9 +130,11 @@ module.exports = function(ctx) {
 
   // 8 - Backspace
   // 46 - Delete
-  const isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
+  var isKeyModeValid = function isKeyModeValid(code) {
+    return !(code === 8 || code === 46 || code >= 48 && code <= 57);
+  };
 
-  events.keydown = function(event) {
+  events.keydown = function (event) {
 
     if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
       event.preventDefault();
@@ -145,20 +150,26 @@ module.exports = function(ctx) {
     }
   };
 
-  events.keyup = function(event) {
+  events.keyup = function (event) {
     if (isKeyModeValid(event.keyCode)) {
       currentMode.keyup(event);
     }
   };
 
-  events.zoomend = function() {
+  events.zoomend = function () {
     ctx.store.changeZoom();
   };
 
-  events.data = function(event) {
+  events.data = function (event) {
     if (event.dataType === 'style') {
-      const { setup, map, options, store } = ctx;
-      const hasLayers = options.styles.some(style => map.getLayer(style.id));
+      var setup = ctx.setup,
+          map = ctx.map,
+          options = ctx.options,
+          store = ctx.store;
+
+      var hasLayers = options.styles.some(function (style) {
+        return map.getLayer(style.id);
+      });
       if (!hasLayers) {
         setup.addLayers();
         store.setDirty();
@@ -167,34 +178,36 @@ module.exports = function(ctx) {
     }
   };
 
-  function changeMode(modename, nextModeOptions, eventOptions = {}) {
+  function changeMode(modename, nextModeOptions) {
+    var eventOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
     currentMode.stop();
 
-    const modebuilder = modes[modename];
+    var modebuilder = modes[modename];
     if (modebuilder === undefined) {
-      throw new Error(`${modename} is not valid`);
+      throw new Error(modename + ' is not valid');
     }
-    currentModeName = modename;
-    const mode = modebuilder(ctx, nextModeOptions);
+    _currentModeName = modename;
+    var mode = modebuilder(ctx, nextModeOptions);
     currentMode = setupModeHandler(mode, ctx);
 
     if (!eventOptions.silent) {
-      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename});
+      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename });
     }
 
     ctx.store.setDirty();
     ctx.store.render();
   }
 
-  const actionState = {
+  var actionState = {
     trash: false,
     combineFeatures: false,
     uncombineFeatures: false
   };
 
   function actionable(actions) {
-    let changed = false;
-    Object.keys(actions).forEach(action => {
+    var changed = false;
+    Object.keys(actions).forEach(function (action) {
       if (actionState[action] === undefined) throw new Error('Invalid action type');
       if (actionState[action] !== actions[action]) changed = true;
       actionState[action] = actions[action];
@@ -202,21 +215,21 @@ module.exports = function(ctx) {
     if (changed) ctx.map.fire(Constants.events.ACTIONABLE, { actions: actionState });
   }
 
-  const api = {
-    changeMode,
-    actionable,
-    currentModeName: function() {
-      return currentModeName;
+  var api = {
+    changeMode: changeMode,
+    actionable: actionable,
+    currentModeName: function currentModeName() {
+      return _currentModeName;
     },
-    currentModeRender: function(geojson, push) {
+    currentModeRender: function currentModeRender(geojson, push) {
       return currentMode.render(geojson, push);
     },
-    fire: function(name, event) {
+    fire: function fire(name, event) {
       if (events[name]) {
         events[name](event);
       }
     },
-    addEventListeners: function() {
+    addEventListeners: function addEventListeners() {
       ctx.map.on('mousemove', events.mousemove);
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
@@ -233,7 +246,7 @@ module.exports = function(ctx) {
         ctx.container.addEventListener('keyup', events.keyup);
       }
     },
-    removeEventListeners: function() {
+    removeEventListeners: function removeEventListeners() {
       ctx.map.off('mousemove', events.mousemove);
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
@@ -250,17 +263,17 @@ module.exports = function(ctx) {
         ctx.container.removeEventListener('keyup', events.keyup);
       }
     },
-    trash: function(options) {
+    trash: function trash(options) {
       currentMode.trash(options);
     },
-    combineFeatures: function() {
+    combineFeatures: function combineFeatures() {
       currentMode.combineFeatures();
     },
-    uncombineFeatures: function() {
+    uncombineFeatures: function uncombineFeatures() {
       currentMode.uncombineFeatures();
     },
-    getMode: function() {
-      return currentModeName;
+    getMode: function getMode() {
+      return _currentModeName;
     }
   };
 

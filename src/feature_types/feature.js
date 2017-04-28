@@ -1,7 +1,9 @@
-const hat = require('hat');
-const Constants = require('../constants');
+'use strict';
 
-const Feature = function(ctx, geojson) {
+var hat = require('hat');
+var Constants = require('../constants');
+
+var Feature = function Feature(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
@@ -9,28 +11,28 @@ const Feature = function(ctx, geojson) {
   this.type = geojson.geometry.type;
 };
 
-Feature.prototype.changed = function() {
+Feature.prototype.changed = function () {
   this.ctx.store.featureChanged(this.id);
 };
 
-Feature.prototype.incomingCoords = function(coords) {
+Feature.prototype.incomingCoords = function (coords) {
   this.setCoordinates(coords);
 };
 
-Feature.prototype.setCoordinates = function(coords) {
+Feature.prototype.setCoordinates = function (coords) {
   this.coordinates = coords;
   this.changed();
 };
 
-Feature.prototype.getCoordinates = function() {
+Feature.prototype.getCoordinates = function () {
   return JSON.parse(JSON.stringify(this.coordinates));
 };
 
-Feature.prototype.setProperty = function(property, value) {
+Feature.prototype.setProperty = function (property, value) {
   this.properties[property] = value;
 };
 
-Feature.prototype.toGeoJSON = function() {
+Feature.prototype.toGeoJSON = function () {
   return JSON.parse(JSON.stringify({
     id: this.id,
     type: Constants.geojsonTypes.FEATURE,
@@ -42,8 +44,8 @@ Feature.prototype.toGeoJSON = function() {
   }));
 };
 
-Feature.prototype.internal = function(mode) {
-  const properties = {
+Feature.prototype.internal = function (mode) {
+  var properties = {
     id: this.id,
     meta: Constants.meta.FEATURE,
     'meta:type': this.type,
@@ -52,8 +54,8 @@ Feature.prototype.internal = function(mode) {
   };
 
   if (this.ctx.options.userProperties) {
-    for (const name in this.properties) {
-      properties[`user_${name}`] = this.properties[name];
+    for (var name in this.properties) {
+      properties['user_' + name] = this.properties[name];
     }
   }
 

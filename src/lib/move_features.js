@@ -1,23 +1,35 @@
-const constrainFeatureMovement = require('./constrain_feature_movement');
-const Constants = require('../constants');
+'use strict';
 
-module.exports = function(features, delta) {
-  const constrainedDelta = constrainFeatureMovement(features.map(feature => feature.toGeoJSON()), delta);
+var constrainFeatureMovement = require('./constrain_feature_movement');
+var Constants = require('../constants');
 
-  features.forEach(feature => {
-    const currentCoordinates = feature.getCoordinates();
+module.exports = function (features, delta) {
+  var constrainedDelta = constrainFeatureMovement(features.map(function (feature) {
+    return feature.toGeoJSON();
+  }), delta);
 
-    const moveCoordinate = (coord) => {
-      const point = {
+  features.forEach(function (feature) {
+    var currentCoordinates = feature.getCoordinates();
+
+    var moveCoordinate = function moveCoordinate(coord) {
+      var point = {
         lng: coord[0] + constrainedDelta.lng,
         lat: coord[1] + constrainedDelta.lat
       };
       return [point.lng, point.lat];
     };
-    const moveRing = (ring) => ring.map(coord => moveCoordinate(coord));
-    const moveMultiPolygon = (multi) => multi.map(ring => moveRing(ring));
+    var moveRing = function moveRing(ring) {
+      return ring.map(function (coord) {
+        return moveCoordinate(coord);
+      });
+    };
+    var moveMultiPolygon = function moveMultiPolygon(multi) {
+      return multi.map(function (ring) {
+        return moveRing(ring);
+      });
+    };
 
-    let nextCoordinates;
+    var nextCoordinates = void 0;
     if (feature.type === Constants.geojsonTypes.POINT) {
       nextCoordinates = moveCoordinate(currentCoordinates);
     } else if (feature.type === Constants.geojsonTypes.LINE_STRING || feature.type === Constants.geojsonTypes.MULTI_POINT) {

@@ -1,15 +1,19 @@
-const euclideanDistance = require('./euclidean_distance');
+'use strict';
 
-const TOLERANCE = 25;
-const INTERVAL = 250;
+var euclideanDistance = require('./euclidean_distance');
 
-module.exports = function isTap(start, end, options = {}) {
-  const tolerance = (options.tolerance != null) ? options.tolerance : TOLERANCE;
-  const interval = (options.interval != null) ? options.interval : INTERVAL;
+var TOLERANCE = 25;
+var INTERVAL = 250;
+
+module.exports = function isTap(start, end) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  var tolerance = options.tolerance != null ? options.tolerance : TOLERANCE;
+  var interval = options.interval != null ? options.interval : INTERVAL;
 
   start.point = start.point || end.point;
   start.time = start.time || end.time;
-  const moveDistance = euclideanDistance(start.point, end.point);
+  var moveDistance = euclideanDistance(start.point, end.point);
 
-  return moveDistance < tolerance && (end.time - start.time) < interval;
+  return moveDistance < tolerance && end.time - start.time < interval;
 };

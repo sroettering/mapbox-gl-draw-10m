@@ -1,4 +1,5 @@
 'use strict';
+
 var util = require('../node_modules/mapbox-gl/js/util/util');
 
 try {
@@ -37,7 +38,7 @@ function main() {
 
         draw_point_small: require('./tests/draw_point_small'),
         draw_point_large: require('./tests/draw_point_large'),
-        draw_point_large_zoomed: require('./tests/draw_point_large_zoomed'),
+        draw_point_large_zoomed: require('./tests/draw_point_large_zoomed')
     };
 
     var pathnameArray = location.pathname.split('/');
@@ -48,9 +49,9 @@ function main() {
 
     var innerHTML = '';
 
-    tests.forEach(function(test) {
+    tests.forEach(function (test) {
         innerHTML += '<div class="test">';
-            innerHTML += '<a href="/bench/'+test+'">'+test+'</a>';
+        innerHTML += '<a href="/bench/' + test + '">' + test + '</a>';
         innerHTML += '</div>';
         if (test === benchmarkName) {
             innerHTML += '<div id="logs"></div>';
@@ -63,7 +64,7 @@ function main() {
 
     var createBenchmark = benchmarks[benchmarkName];
     if (!createBenchmark) {
-        log('dark', benchmarkName+' is not a valid test name');
+        log('dark', benchmarkName + ' is not a valid test name');
         return;
     }
 
@@ -72,15 +73,15 @@ function main() {
         createMap: createMap
     });
 
-    benchmark.on('log', function(event) {
+    benchmark.on('log', function (event) {
         log(event.color || 'blue', event.message);
     });
 
-    benchmark.on('pass', function(event) {
+    benchmark.on('pass', function (event) {
         log('green', '<strong class="prose-big">' + event.message + '</strong>');
     });
 
-    benchmark.on('fail', function(event) {
+    benchmark.on('fail', function (event) {
         log('red', '<strong class="prose-big">' + event.message + '</strong>');
     });
 }
@@ -90,12 +91,7 @@ function log(color, message) {
 }
 
 function getAccessToken() {
-    var accessToken = (
-        process.env.MapboxAccessToken ||
-        process.env.MAPBOX_ACCESS_TOKEN ||
-        getURLParameter('access_token') ||
-        localStorage.getItem('accessToken')
-    );
+    var accessToken = process.env.MapboxAccessToken || process.env.MAPBOX_ACCESS_TOKEN || getURLParameter('access_token') || localStorage.getItem('accessToken');
     localStorage.setItem('accessToken', accessToken);
     return accessToken;
 }
@@ -109,7 +105,7 @@ function getURLParameter(name) {
 function createMap(options) {
     var mapElement = document.getElementById('map');
 
-    options = util.extend({width: 512, height: 512}, options);
+    options = util.extend({ width: 512, height: 512 }, options);
 
     mapElement.style.display = 'block';
     mapElement.style.width = options.width + 'px';
@@ -128,5 +124,5 @@ function createMap(options) {
     return {
         draw: draw,
         map: map
-    }
+    };
 }

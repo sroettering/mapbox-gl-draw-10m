@@ -1,10 +1,12 @@
-const CommonSelectors = require('../lib/common_selectors');
-const Point = require('../feature_types/point');
-const Constants = require('../constants');
+'use strict';
 
-module.exports = function(ctx) {
+var CommonSelectors = require('../lib/common_selectors');
+var Point = require('../feature_types/point');
+var Constants = require('../constants');
 
-  const point = new Point(ctx, {
+module.exports = function (ctx) {
+
+  var point = new Point(ctx, {
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
@@ -32,7 +34,7 @@ module.exports = function(ctx) {
   }
 
   return {
-    start() {
+    start: function start() {
       ctx.store.clearSelected();
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POINT);
@@ -46,22 +48,19 @@ module.exports = function(ctx) {
         trash: true
       });
     },
-
-    stop() {
+    stop: function stop() {
       ctx.ui.setActiveButton();
       if (!point.getCoordinate().length) {
         ctx.store.delete([point.id], { silent: true });
       }
     },
-
-    render(geojson, callback) {
-      const isActivePoint = geojson.properties.id === point.id;
-      geojson.properties.active = (isActivePoint) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+    render: function render(geojson, callback) {
+      var isActivePoint = geojson.properties.id === point.id;
+      geojson.properties.active = isActivePoint ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActivePoint) return callback(geojson);
       // Never render the point we're drawing
     },
-
-    trash() {
+    trash: function trash() {
       stopDrawingAndRemove();
     }
   };

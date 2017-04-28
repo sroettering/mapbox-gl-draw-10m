@@ -1,9 +1,11 @@
-const events = require('./events');
-const Store = require('./store');
-const ui = require('./ui');
-const Constants = require('./constants');
+'use strict';
 
-module.exports = function(ctx) {
+var events = require('./events');
+var Store = require('./store');
+var ui = require('./ui');
+var Constants = require('./constants');
+
+module.exports = function (ctx) {
 
   ctx.events = events(ctx);
 
@@ -12,10 +14,10 @@ module.exports = function(ctx) {
   ctx.store = null;
   ctx.ui = ui(ctx);
 
-  let controlContainer = null;
+  var controlContainer = null;
 
-  const setup = {
-    onRemove: function() {
+  var setup = {
+    onRemove: function onRemove() {
       setup.removeLayers();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
@@ -28,7 +30,7 @@ module.exports = function(ctx) {
 
       return this;
     },
-    onAdd: function(map) {
+    onAdd: function onAdd(map) {
       ctx.map = map;
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
@@ -43,9 +45,9 @@ module.exports = function(ctx) {
         map.dragPan.enable();
       }
 
-      let intervalId = null;
+      var intervalId = null;
 
-      const connect = () => {
+      var connect = function connect() {
         map.off('load', connect);
         clearInterval(intervalId);
         setup.addLayers();
@@ -56,12 +58,14 @@ module.exports = function(ctx) {
         connect();
       } else {
         map.on('load', connect);
-        intervalId = setInterval(() => { if (map.loaded()) connect(); }, 16);
+        intervalId = setInterval(function () {
+          if (map.loaded()) connect();
+        }, 16);
       }
 
       return controlContainer;
     },
-    addLayers: function() {
+    addLayers: function addLayers() {
       // drawn features style
       ctx.map.addSource(Constants.sources.COLD, {
         data: {
@@ -80,14 +84,14 @@ module.exports = function(ctx) {
         type: 'geojson'
       });
 
-      ctx.options.styles.forEach(style => {
+      ctx.options.styles.forEach(function (style) {
         ctx.map.addLayer(style);
       });
 
       ctx.store.render();
     },
-    removeLayers: function() {
-      ctx.options.styles.forEach(style => {
+    removeLayers: function removeLayers() {
+      ctx.options.styles.forEach(function (style) {
         ctx.map.removeLayer(style.id);
       });
 

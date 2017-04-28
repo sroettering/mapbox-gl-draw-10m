@@ -1,12 +1,19 @@
-const createVertex = require('./create_vertex');
-const createMidpoint = require('./create_midpoint');
-const Constants = require('../constants');
+'use strict';
 
-function createSupplementaryPoints(geojson, options = {}, basePath = null) {
-  const { type, coordinates } = geojson.geometry;
-  const featureId = geojson.properties && geojson.properties.id;
+var createVertex = require('./create_vertex');
+var createMidpoint = require('./create_midpoint');
+var Constants = require('../constants');
 
-  let supplementaryPoints = [];
+function createSupplementaryPoints(geojson) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var basePath = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var _geojson$geometry = geojson.geometry,
+      type = _geojson$geometry.type,
+      coordinates = _geojson$geometry.coordinates;
+
+  var featureId = geojson.properties && geojson.properties.id;
+
+  var supplementaryPoints = [];
 
   if (type === Constants.geojsonTypes.POINT) {
     // For points, just create a vertex
@@ -14,8 +21,8 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   } else if (type === Constants.geojsonTypes.POLYGON) {
     // Cycle through a Polygon's rings and
     // process each line
-    coordinates.forEach((line, lineIndex) => {
-      processLine(line, (basePath !== null) ? `${basePath}.${lineIndex}` : String(lineIndex));
+    coordinates.forEach(function (line, lineIndex) {
+      processLine(line, basePath !== null ? basePath + '.' + lineIndex : String(lineIndex));
     });
   } else if (type === Constants.geojsonTypes.LINE_STRING) {
     processLine(coordinates, basePath);
@@ -24,17 +31,17 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   }
 
   function processLine(line, lineBasePath) {
-    let firstPointString = '';
-    let lastVertex = null;
-    line.forEach((point, pointIndex) => {
-      const pointPath = (lineBasePath !== undefined && lineBasePath !== null) ? `${lineBasePath}.${pointIndex}` : String(pointIndex);
-      const vertex = createVertex(featureId, point, pointPath, isSelectedPath(pointPath));
+    var firstPointString = '';
+    var lastVertex = null;
+    line.forEach(function (point, pointIndex) {
+      var pointPath = lineBasePath !== undefined && lineBasePath !== null ? lineBasePath + '.' + pointIndex : String(pointIndex);
+      var vertex = createVertex(featureId, point, pointPath, isSelectedPath(pointPath));
 
       // If we're creating midpoints, check if there was a
       // vertex before this one. If so, add a midpoint
       // between that vertex and this one.
       if (options.midpoints && lastVertex) {
-        const midpoint = createMidpoint(featureId, lastVertex, vertex, options.map);
+        var midpoint = createMidpoint(featureId, lastVertex, vertex, options.map);
         if (midpoint) {
           supplementaryPoints.push(midpoint);
         }
@@ -44,7 +51,7 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
       // A Polygon line's last point is the same as the first point. If we're on the last
       // point, we want to draw a midpoint before it but not another vertex on it
       // (since we already a vertex there, from the first point).
-      const stringifiedPoint = JSON.stringify(point);
+      var stringifiedPoint = JSON.stringify(point);
       if (firstPointString !== stringifiedPoint) {
         supplementaryPoints.push(vertex);
       }
@@ -63,9 +70,9 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   // geometries, and accumulate the supplementary points
   // for each of those constituents
   function processMultiGeometry() {
-    const subType = type.replace(Constants.geojsonTypes.MULTI_PREFIX, '');
-    coordinates.forEach((subCoordinates, index) => {
-      const subFeature = {
+    var subType = type.replace(Constants.geojsonTypes.MULTI_PREFIX, '');
+    coordinates.forEach(function (subCoordinates, index) {
+      var subFeature = {
         type: Constants.geojsonTypes.FEATURE,
         properties: geojson.properties,
         geometry: {

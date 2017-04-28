@@ -1,7 +1,8 @@
+'use strict';
 
-const ModeHandler = function(mode, DrawContext) {
+var ModeHandler = function ModeHandler(mode, DrawContext) {
 
-  const handlers = {
+  var handlers = {
     drag: [],
     click: [],
     mousemove: [],
@@ -16,26 +17,26 @@ const ModeHandler = function(mode, DrawContext) {
     tap: []
   };
 
-  const ctx = {
-    on: function(event, selector, fn) {
+  var ctx = {
+    on: function on(event, selector, fn) {
       if (handlers[event] === undefined) {
-        throw new Error(`Invalid event type: ${event}`);
+        throw new Error('Invalid event type: ' + event);
       }
       handlers[event].push({
         selector: selector,
         fn: fn
       });
     },
-    render: function(id) {
+    render: function render(id) {
       DrawContext.store.featureChanged(id);
     }
   };
 
-  const delegate = function (eventName, event) {
-    const handles = handlers[eventName];
-    let iHandle = handles.length;
+  var delegate = function delegate(eventName, event) {
+    var handles = handlers[eventName];
+    var iHandle = handles.length;
     while (iHandle--) {
-      const handle = handles[iHandle];
+      var handle = handles[iHandle];
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
         DrawContext.store.render();
@@ -53,59 +54,59 @@ const ModeHandler = function(mode, DrawContext) {
 
   return {
     render: mode.render,
-    stop: function() {
+    stop: function stop() {
       if (mode.stop) mode.stop();
     },
-    trash: function() {
+    trash: function trash() {
       if (mode.trash) {
         mode.trash();
         DrawContext.store.render();
       }
     },
-    combineFeatures: function() {
+    combineFeatures: function combineFeatures() {
       if (mode.combineFeatures) {
         mode.combineFeatures();
       }
     },
-    uncombineFeatures: function() {
+    uncombineFeatures: function uncombineFeatures() {
       if (mode.uncombineFeatures) {
         mode.uncombineFeatures();
       }
     },
-    drag: function(event) {
+    drag: function drag(event) {
       delegate('drag', event);
     },
-    click: function(event) {
+    click: function click(event) {
       delegate('click', event);
     },
-    mousemove: function(event) {
+    mousemove: function mousemove(event) {
       delegate('mousemove', event);
     },
-    mousedown: function(event) {
+    mousedown: function mousedown(event) {
       delegate('mousedown', event);
     },
-    mouseup: function(event) {
+    mouseup: function mouseup(event) {
       delegate('mouseup', event);
     },
-    mouseout: function(event) {
+    mouseout: function mouseout(event) {
       delegate('mouseout', event);
     },
-    keydown: function(event) {
+    keydown: function keydown(event) {
       delegate('keydown', event);
     },
-    keyup: function(event) {
+    keyup: function keyup(event) {
       delegate('keyup', event);
     },
-    touchstart: function(event) {
+    touchstart: function touchstart(event) {
       delegate('touchstart', event);
     },
-    touchmove: function(event) {
+    touchmove: function touchmove(event) {
       delegate('touchmove', event);
     },
-    touchend: function(event) {
+    touchend: function touchend(event) {
       delegate('touchend', event);
     },
-    tap: function(event) {
+    tap: function tap(event) {
       delegate('tap', event);
     }
   };

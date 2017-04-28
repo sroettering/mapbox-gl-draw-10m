@@ -1,7 +1,9 @@
+'use strict';
+
 var mouseEvents = require('./mouse_events');
 var mousePath = require('./mouse_path');
 
-module.exports = function(start, map) {
+module.exports = function (start, map) {
 
   var path = mousePath(start);
 
@@ -17,15 +19,15 @@ module.exports = function(start, map) {
     y: start.y
   });
 
-  for (var i=0; i<path.length; i++) {
+  for (var i = 0; i < path.length; i++) {
     events.push('mouseup', path[i]);
     events.push('mousemove', path[i]);
     events.push('mousedown', path[i]);
   }
 
-  events.push('mouseup', path[path.length-1]);
+  events.push('mouseup', path[path.length - 1]);
 
-  return function(cb) {
+  return function (cb) {
     events.run(cb);
-  }
-}
+  };
+};

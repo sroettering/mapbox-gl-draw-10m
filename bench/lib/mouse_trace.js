@@ -1,12 +1,14 @@
+'use strict';
+
 var mouseEvents = require('./mouse_events');
 
-module.exports = function(ring, map) {
+module.exports = function (ring, map) {
 
   var events = mouseEvents(map);
 
   var lastPoint = null;
 
-  for (var c=0; c<ring.length; c++) {
+  for (var c = 0; c < ring.length; c++) {
     var coord = ring[c];
     var point = map.project({
       lng: coord[0],
@@ -24,8 +26,7 @@ module.exports = function(ring, map) {
     events.push('mouseup', lastPoint);
   }
 
-  return function(cb) {
+  return function (cb) {
     events.run(cb);
-  }
-
-}
+  };
+};
